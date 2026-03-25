@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset 
+    xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 
+                        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+
+    <!-- Main Pages Sitemap -->
+
+    <url>
+        <loc>https://bd.p9x9.com</loc>
+        <lastmod>2026-02-15T17:09:36+00:00</lastmod>
+        <priority>1.00</priority>
+    </url>
+
+    <url>
+        <loc>https://bd.p9x9.com/pages/about</loc>
+        <lastmod>2026-02-15T17:09:36+00:00</lastmod>
+        <priority>0.80</priority>
+    </url>
+
+    <url>
+        <loc>https://bd.p9x9.com/pages/contact</loc>
+        <lastmod>2026-02-15T17:09:36+00:00</lastmod>
+        <priority>0.80</priority>
+    </url>
+
+    <url>
+        <loc>https://bd.p9x9.com/pages/policy</loc>
+        <lastmod>2026-02-15T17:09:36+00:00</lastmod>
+        <priority>0.80</priority>
+    </url>
+
+    <url>
+        <loc>https://bd.p9x9.com/pages/terms</loc>
+        <lastmod>2026-02-15T17:09:36+00:00</lastmod>
+        <priority>0.80</priority>
+    </url>
+
+</urlset>

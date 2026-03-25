@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /test
+Disallow: /test.html
+Sitemap: https://bd.p9x9.com/sitemap.xml
+Sitemap: https://bd.p9x9.com/videos.xml
