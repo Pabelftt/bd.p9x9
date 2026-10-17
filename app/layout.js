@@ -4,6 +4,7 @@ import HeaderBanner from "@/components/HeaderBanner";
 import Footer from "@/components/Footer";
 import ThemeScript from "@/components/ThemeScript";
 import SocialBarAd from "@/components/SocialBarAd";
+import NotificationPrompt from "@/components/NotificationPrompt";
 import Script from "next/script";
 import { Suspense } from "react";
 import { SITE_CONFIG } from "@/lib/config";
@@ -94,6 +95,7 @@ export default function RootLayout({ children }) {
         <main className="site-main-content">{children}</main>
         <Footer />
         <SocialBarAd />
+        <NotificationPrompt />
       </body>
     </html>
   );
