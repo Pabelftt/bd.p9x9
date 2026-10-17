@@ -23,10 +23,10 @@ export default function Error({
           <span>!</span>
         </div>
 
-        <h1 className="error-title">কিছু ভুল হয়েছে</h1>
+        <h1 className="error-title">Something went wrong</h1>
 
         <p className="error-subtitle">
-          অনুরোধ প্রক্রিয়া করার সময় একটি অপ্রত্যাশিত সমস্যা দেখা দিয়েছে। অনুগ্রহ করে পুনরায় চেষ্টা করুন বা হোমে ফিরে যান।
+          An unexpected error occurred while processing your request. Please try again or return to the homepage.
         </p>
 
         <div className="error-actions-group">
@@ -40,7 +40,7 @@ export default function Error({
 
           <Link href="/" className="btn-error-secondary">
             <PlayIcon size={16} />
-            <span>হোমে ফিরে যান</span>
+            <span>Return to Home</span>
           </Link>
         </div>
       </div>

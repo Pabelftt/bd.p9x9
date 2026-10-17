@@ -28,7 +28,7 @@ export const metadata = {
   },
   openGraph: {
     type: "website",
-    locale: "bn_BD",
+    locale: "en_US",
     url: SITE_CONFIG.baseUrl,
     siteName: SITE_CONFIG.siteName,
     title: SITE_CONFIG.defaultTitle,
@@ -66,7 +66,7 @@ export default function RootLayout({ children }) {
   const gaId = SITE_CONFIG.gaMeasurementId;
 
   return (
-    <html lang="bn" data-theme="dark" suppressHydrationWarning>
+    <html lang="en" data-theme="dark" suppressHydrationWarning>
       <head>
         <ThemeScript />
         <link rel="preconnect" href="https://i.postimg.cc" />

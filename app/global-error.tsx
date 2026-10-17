@@ -15,7 +15,7 @@ export default function GlobalError({
   }, [error]);
 
   return (
-    <html lang="bn">
+    <html lang="en">
       <head>
         <title>Error | BD.P9X9</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -98,16 +98,16 @@ export default function GlobalError({
       <body>
         <div className="box">
           <div className="icon">!</div>
-          <h1>কিছু ভুল হয়েছে</h1>
+          <h1>Something went wrong</h1>
           <p>
-            অ্যাপ্লিকেশনে একটি গুরুতর ত্রুটি ঘটেছে। অনুগ্রহ করে আবার চেষ্টা করুন অথবা হোমপেজে যান।
+            An unexpected application error occurred. Please try again or return to the homepage.
           </p>
           <div className="btn-group">
             <button type="button" onClick={() => reset()} className="btn btn-primary">
               Try again
             </button>
             <Link href="/" className="btn btn-secondary">
-              হোমে যান
+              Go to Home
             </Link>
           </div>
         </div>

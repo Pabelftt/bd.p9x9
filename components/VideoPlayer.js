@@ -12,7 +12,7 @@ export default function VideoPlayer({
   movie,
   initialConsented = false,
   telegramLink = "",
-  description = "প্রথমবার ভিডিও চালাতে Continue চাপতে হবে।",
+  description = "Press Continue on first visit to start streaming free HD videos.",
   redirectUrl = "",
 }) {
   // Helper to check 5-minute consent from sessionStorage, localStorage, and cookies
@@ -369,7 +369,7 @@ export default function VideoPlayer({
             </h2>
 
             <p id="modal-desc" className="modal-desc">
-              প্রথমবার ভিডিও চালাতে Continue চাপতে হবে।
+              Press Continue on first visit to start streaming.
             </p>
 
             <div className="modal-actions">
