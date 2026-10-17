@@ -2,8 +2,8 @@ import Link from "next/link";
 import { PlayIcon, SearchIcon } from "@/components/icons/Icons";
 
 export const metadata = {
-  title: "404 - পেজটি খুঁজে পাওয়া যায়নি | BD.P9X9",
-  description: "অনুরোধ করা পেজ বা ভিডিওটি খুঁজে পাওয়া যায়নি।",
+  title: "404 - Page Not Found | BD.P9X9",
+  description: "The requested page or video could not be found.",
   robots: {
     index: false,
     follow: false,
@@ -18,20 +18,20 @@ export default function NotFound() {
           <span className="error-code-text">404</span>
         </div>
 
-        <h1 className="error-title">পেজটি খুঁজে পাওয়া যায়নি</h1>
+        <h1 className="error-title">Page Not Found</h1>
 
         <p className="error-subtitle">
-          আপনি যে পেজ বা ভিডিওটি খুঁজছেন তা সম্ভবত মুছে ফেলা হয়েছে, নাম পরিবর্তন করা হয়েছে অথবা লিঙ্কটি ভুল দেওয়া হয়েছে।
+          The page or video you are looking for might have been removed, had its name changed, or is temporarily unavailable.
         </p>
 
         <div className="error-actions-group">
           <Link href="/" className="btn-error-primary">
             <PlayIcon size={16} />
-            <span>হোমে ফিরে যান</span>
+            <span>Return to Home</span>
           </Link>
           <Link href="/" className="btn-error-secondary">
             <SearchIcon size={16} />
-            <span>সব ভিডিও ব্রাউজ করুন</span>
+            <span>Browse All Videos</span>
           </Link>
         </div>
       </div>

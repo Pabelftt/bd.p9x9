@@ -42,27 +42,34 @@ export default function NotificationPrompt() {
   const [showManageModal, setShowManageModal] = useState(false);
 
   useEffect(() => {
-    if (!isPushSupported()) {
-      return;
-    }
-
-    // Check existing subscription
-    getExistingSubscription().then((sub) => {
-      if (sub) {
-        setIsSubscribed(true);
+    try {
+      if (!isPushSupported()) {
+        return;
       }
-    });
 
-    // Check if dismissed previously
-    const dismissedUntil = localStorage.getItem(DISMISS_KEY);
-    const isDismissed = dismissedUntil && Number(dismissedUntil) > Date.now();
+      // Check existing subscription
+      getExistingSubscription()
+        .then((sub) => {
+          if (sub) {
+            setIsSubscribed(true);
+          }
+        })
+        .catch(() => {});
 
-    // If permission is default and not dismissed, show prompt after 2.5 seconds
-    if (currentPerm === "default" && !isDismissed) {
-      const timer = setTimeout(() => {
-        setShowPrompt(true);
-      }, 2500);
-      return () => clearTimeout(timer);
+      // Check if dismissed previously
+      const dismissedUntil = localStorage.getItem(DISMISS_KEY);
+      const isDismissed = dismissedUntil && Number(dismissedUntil) > Date.now();
+
+      const currentPerm = getNotificationPermission();
+      // If permission is default and not dismissed, show prompt after 2.5 seconds
+      if (currentPerm === "default" && !isDismissed) {
+        const timer = setTimeout(() => {
+          setShowPrompt(true);
+        }, 2500);
+        return () => clearTimeout(timer);
+      }
+    } catch (err) {
+      console.warn("Notification prompt init error:", err);
     }
   }, []);
 

@@ -1,4 +1,4 @@
-const BASE = "http://localhost:3005";
+const BASE = process.env.TEST_URL || "http://localhost:3000";
 
 async function runTests() {
   console.log("=== P9X9 SYSTEM VERIFICATION TEST SUITE ===");

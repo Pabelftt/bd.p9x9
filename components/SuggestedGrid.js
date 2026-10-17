@@ -50,7 +50,7 @@ export default function SuggestedGrid({
       }
     } catch (err) {
       console.error("Error loading suggestions:", err);
-      setError("?????? ??? ???? ?????? ??????");
+      setError("Failed to load suggested videos. Please try again.");
     } finally {
       setLoading(false);
     }
