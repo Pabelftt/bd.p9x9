@@ -6,41 +6,47 @@ import Movie from "@/lib/models/Movie";
 export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = SITE_CONFIG.baseUrl;
+  const baseUrl = SITE_CONFIG.baseUrl.replace(/\/+$/, "");
 
   const entries: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
-      lastModified: new Date(),
       changeFrequency: "daily",
       priority: 1.0,
     },
     {
       url: `${baseUrl}/about`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.8,
     },
     {
       url: `${baseUrl}/contact`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.8,
     },
   ];
 
   try {
-    await connectDB();
-    const movies = await (Movie as any).find({}, "id").sort({ _id: -1 }).lean();
+    await connectDB({ serverSelectionTimeoutMS: 5000 });
+    const movies = await (Movie as any).find({}, "id updatedAt createdAt")
+      .sort({ _id: -1 })
+      .maxTimeMS(5000)
+      .lean();
     for (const movie of movies) {
-      if (movie && movie.id) {
-        entries.push({
-          url: `${baseUrl}/movie/${encodeURIComponent(String(movie.id).trim())}`,
-          lastModified: new Date(),
-          changeFrequency: "daily",
-          priority: 0.7,
-        });
+      const id = String(movie?.id || "").trim();
+      if (!id) continue;
+
+      const entry: MetadataRoute.Sitemap[number] = {
+        url: `${baseUrl}/movie/${encodeURIComponent(id)}`,
+        changeFrequency: "daily",
+        priority: 0.7,
+      };
+      const modifiedAt = movie.updatedAt || movie.createdAt;
+      const lastModified = modifiedAt ? new Date(modifiedAt) : null;
+      if (lastModified && Number.isFinite(lastModified.getTime())) {
+        entry.lastModified = lastModified;
       }
+      entries.push(entry);
     }
   } catch (err) {
     console.error("Error generating sitemap entries:", err);
