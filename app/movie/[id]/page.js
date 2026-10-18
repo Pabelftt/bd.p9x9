@@ -62,6 +62,42 @@ export default async function MoviePage({ params }) {
 
   const movie = JSON.parse(JSON.stringify(movieDoc));
 
+  // Real-data-only VideoObject structured data for video SEO.
+  // Legacy movie documents have no createdAt/updatedAt, but the MongoDB
+  // ObjectId embeds the real insertion timestamp of the record.
+  const canonicalUrl = `${SITE_CONFIG.baseUrl}/movie/${encodeURIComponent(movie.id)}`;
+  const objectIdDate = (() => {
+    const hex = typeof movie._id === "string" ? movie._id : "";
+    if (!/^[0-9a-fA-F]{24}$/.test(hex)) return null;
+    return new Date(parseInt(hex.slice(0, 8), 16) * 1000);
+  })();
+  const uploadDateRaw = movie.createdAt || movie.updatedAt || objectIdDate;
+  const uploadDate = uploadDateRaw && !Number.isNaN(new Date(uploadDateRaw).getTime())
+    ? new Date(uploadDateRaw).toISOString()
+    : null;
+  const posterUrl = movie.img
+    ? movie.img.startsWith("http")
+      ? movie.img
+      : `${SITE_CONFIG.baseUrl}${movie.img.startsWith("/") ? "" : "/"}${movie.img}`
+    : SITE_CONFIG.defaultOgImage;
+  const videoJsonLd = uploadDate
+    ? {
+        "@context": "https://schema.org",
+        "@type": "VideoObject",
+        name: movie.hadding,
+        description: SITE_CONFIG.defaultDescription,
+        thumbnailUrl: [posterUrl],
+        uploadDate,
+        url: canonicalUrl,
+        embedUrl: canonicalUrl,
+        publisher: {
+          "@type": "Organization",
+          name: SITE_CONFIG.siteName,
+          url: SITE_CONFIG.baseUrl,
+        },
+      }
+    : null;
+
   // Suggested videos
   const suggestedData = await getSuggestedMovies(id, 0, SITE_CONFIG.moviePageSize);
   const suggested = JSON.parse(JSON.stringify(suggestedData.movies || []));
@@ -82,6 +118,12 @@ export default async function MoviePage({ params }) {
 
   return (
     <div className="movie-page-wrap">
+      {videoJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(videoJsonLd) }}
+        />
+      )}
       <div className="main-container">
         <VideoPlayer
           movie={movie}
