@@ -3,6 +3,7 @@ import {
   verifyAdminCredentials,
   createAdminSessionToken,
   isRateLimited,
+  isAdminAuthConfigured,
 } from "@/lib/admin-auth";
 import { SITE_CONFIG } from "@/lib/config";
 
@@ -18,6 +19,19 @@ export async function POST(request) {
       return NextResponse.json(
         { error: "Too many login attempts. Please wait 1 minute." },
         { status: 429 }
+      );
+    }
+
+    if (!isAdminAuthConfigured()) {
+      console.error(
+        "Admin login blocked: ADMIN_PASSWORD and/or ADMIN_SESSION_SECRET are not set in the environment."
+      );
+      return NextResponse.json(
+        {
+          error:
+            "Admin authentication is not configured on the server. Please set ADMIN_PASSWORD and ADMIN_SESSION_SECRET environment variables.",
+        },
+        { status: 503 }
       );
     }
 

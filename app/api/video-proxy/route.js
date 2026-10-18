@@ -2,28 +2,55 @@ import { NextResponse } from "next/server";
 import { SITE_CONFIG } from "@/lib/config";
 import { getMovieById } from "@/lib/movies";
 
-export async function GET(request) {
+const UPSTREAM_TIMEOUT_MS = 15000;
+
+function parseHttpUrl(raw) {
+  if (!raw || typeof raw !== "string") return null;
   try {
-    const { searchParams } = new URL(request.url);
-    let videoUrl = searchParams.get("url");
-    const id = searchParams.get("id");
+    const parsed = new URL(raw.trim());
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
 
-    // If ID is provided, look up upstream URL securely from database
-    if (id && !videoUrl) {
-      try {
-        const movie = await getMovieById(id);
-        if (movie && movie.play) {
-          videoUrl = movie.play;
-        }
-      } catch (err) {
-        console.error("Failed to resolve movie video URL by id:", err);
+function browserFallbackUrl(target) {
+  // The site is served over HTTPS, so redirecting a media element to an http://
+  // URL would be blocked by the browser as mixed content. Upgrade to https.
+  if (target.protocol === "http:") {
+    const upgraded = new URL(target.href);
+    upgraded.protocol = "https:";
+    return upgraded.href;
+  }
+  return target.href;
+}
+
+export async function GET(request) {
+  const { searchParams } = new URL(request.url);
+  let videoUrl = searchParams.get("url");
+  const id = searchParams.get("id");
+
+  // If ID is provided, look up upstream URL securely from database
+  if (id && !videoUrl) {
+    try {
+      const movie = await getMovieById(id);
+      if (movie && movie.play) {
+        videoUrl = movie.play;
       }
+    } catch (err) {
+      console.error("Failed to resolve movie video URL by id:", err);
     }
+  }
 
-    if (!videoUrl) {
-      return new NextResponse("Missing video source", { status: 400 });
-    }
+  const target = parseHttpUrl(videoUrl);
+  if (!target) {
+    return new NextResponse("Missing or invalid video source", { status: 400 });
+  }
 
+  const fallbackUrl = browserFallbackUrl(target);
+
+  try {
     const rangeHeader = request.headers.get("range");
     const upstreamHeaders = {};
 
@@ -31,13 +58,17 @@ export async function GET(request) {
       upstreamHeaders["Range"] = rangeHeader;
     }
 
-    const upstreamResponse = await fetch(videoUrl, {
+    const upstreamResponse = await fetch(target.href, {
       headers: upstreamHeaders,
+      signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
+      redirect: "follow",
     });
 
     if (!upstreamResponse.ok && upstreamResponse.status !== 206) {
-      // Fallback redirect to source if proxy fails
-      return NextResponse.redirect(videoUrl, 307);
+      // Upstream refused this server (blocked datacenter IP, hotlink
+      // protection, etc). Fall back to the existing redirect design so the
+      // visitor's own browser can load the source directly.
+      return NextResponse.redirect(fallbackUrl, 307);
     }
 
     const responseHeaders = new Headers();
@@ -63,11 +94,8 @@ export async function GET(request) {
     });
   } catch (error) {
     console.error("Video proxy stream error:", error);
-    const { searchParams } = new URL(request.url);
-    const videoUrl = searchParams.get("url");
-    if (videoUrl) {
-      return NextResponse.redirect(videoUrl, 307);
-    }
-    return new NextResponse("Video stream failed", { status: 500 });
+    // Never fail the playback path with a 500 when the source URL is known:
+    // redirect the browser to the source so it can still stream directly.
+    return NextResponse.redirect(fallbackUrl, 307);
   }
 }

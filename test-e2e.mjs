@@ -1,4 +1,6 @@
 const BASE = process.env.TEST_URL || "http://localhost:3000";
+const ADMIN_TEST_USERNAME = process.env.ADMIN_USERNAME || "admin";
+const ADMIN_TEST_PASSWORD = process.env.ADMIN_PASSWORD || "";
 
 async function runTests() {
   console.log("=== P9X9 SYSTEM VERIFICATION TEST SUITE ===");
@@ -88,20 +90,28 @@ async function runTests() {
   }
 
   // 7. Admin Login with valid credentials
+  // Credentials come from ADMIN_USERNAME / ADMIN_PASSWORD env vars.
+  // Admin-authenticated tests are skipped when ADMIN_PASSWORD is not set.
   let adminCookie = "";
+  const adminTestsEnabled = Boolean(ADMIN_TEST_PASSWORD);
+  if (!adminTestsEnabled) {
+    console.log("[SKIP] Admin-authenticated tests (7, 9-15): set ADMIN_PASSWORD env var to run them.");
+  }
   try {
-    const res = await fetch(`${BASE}/api/admin/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username: "admin", password: "p9x9admin2026!" }),
-    });
-    const setCookie = res.headers.get("set-cookie") || "";
-    const match = setCookie.match(/p9x9_admin_session=([^;]+)/);
-    if (match) {
-      adminCookie = `p9x9_admin_session=${match[1]}`;
+    if (adminTestsEnabled) {
+      const res = await fetch(`${BASE}/api/admin/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: ADMIN_TEST_USERNAME, password: ADMIN_TEST_PASSWORD }),
+      });
+      const setCookie = res.headers.get("set-cookie") || "";
+      const match = setCookie.match(/p9x9_admin_session=([^;]+)/);
+      if (match) {
+        adminCookie = `p9x9_admin_session=${match[1]}`;
+      }
+      const data = await res.json();
+      assert(res.status === 200 && data.success === true && !!adminCookie, "7. Admin login succeeds and returns signed HTTP-only session cookie");
     }
-    const data = await res.json();
-    assert(res.status === 200 && data.success === true && !!adminCookie, "7. Admin login succeeds and returns signed HTTP-only session cookie");
   } catch (err) {
     assert(false, `7. Admin login success error: ${err.message}`);
   }
@@ -115,7 +125,7 @@ async function runTests() {
   }
 
   // 9. Admin Protected Stats (Authorized test)
-  try {
+  if (adminTestsEnabled) try {
     const res = await fetch(`${BASE}/api/admin/stats`, {
       headers: { Cookie: adminCookie },
     });
@@ -132,7 +142,7 @@ async function runTests() {
   }
 
   // 10. Admin Subscriptions List
-  try {
+  if (adminTestsEnabled) try {
     const res = await fetch(`${BASE}/api/admin/subscriptions`, {
       headers: { Cookie: adminCookie },
     });
@@ -148,7 +158,7 @@ async function runTests() {
   }
 
   // 11. Broadcast validation (unsafe javascript: URL rejected)
-  try {
+  if (adminTestsEnabled) try {
     const res = await fetch(`${BASE}/api/admin/broadcast`, {
       method: "POST",
       headers: { "Content-Type": "application/json", Cookie: adminCookie },
@@ -163,7 +173,7 @@ async function runTests() {
   }
 
   // 12. Broadcast execution
-  try {
+  if (adminTestsEnabled) try {
     const res = await fetch(`${BASE}/api/admin/broadcast`, {
       method: "POST",
       headers: { "Content-Type": "application/json", Cookie: adminCookie },
@@ -185,7 +195,7 @@ async function runTests() {
   }
 
   // 13. Broadcast Campaigns History
-  try {
+  if (adminTestsEnabled) try {
     const res = await fetch(`${BASE}/api/admin/campaigns`, {
       headers: { Cookie: adminCookie },
     });
@@ -201,7 +211,7 @@ async function runTests() {
   }
 
   // 14. Admin UI Pages SSR
-  try {
+  if (adminTestsEnabled) try {
     const res = await fetch(`${BASE}/admin`, {
       headers: { Cookie: adminCookie },
     });
@@ -214,7 +224,7 @@ async function runTests() {
     assert(false, `14. Admin dashboard page error: ${err.message}`);
   }
 
-  try {
+  if (adminTestsEnabled) try {
     const res = await fetch(`${BASE}/admin/notifications`, {
       headers: { Cookie: adminCookie },
     });

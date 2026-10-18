@@ -10,9 +10,19 @@ export async function GET(request) {
       return new NextResponse("Invalid request: missing video URL", { status: 400 });
     }
 
+    let target;
+    try {
+      target = new URL(videoUrl.trim());
+    } catch {
+      return new NextResponse("Invalid request: invalid video URL", { status: 400 });
+    }
+    if (target.protocol !== "http:" && target.protocol !== "https:") {
+      return new NextResponse("Invalid request: unsupported URL scheme", { status: 400 });
+    }
+
     const safeName = name.replace(/[^\w\d]/g, "_").substring(0, 40) || "video";
 
-    const upstream = await fetch(videoUrl);
+    const upstream = await fetch(target.href);
     if (!upstream.ok) {
       return new NextResponse("Failed to fetch remote video file", { status: upstream.status });
     }

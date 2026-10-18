@@ -3,7 +3,10 @@ import { SITE_CONFIG } from "@/lib/config";
 import connectDB from "@/lib/db";
 import Movie from "@/lib/models/Movie";
 
-export const dynamic = "force-dynamic";
+// Cached via ISR so crawlers get a fast response even when the database
+// connection is slow or cold. The sitemap is still generated dynamically
+// from MongoDB (with timeout + error handling) and refreshes hourly.
+export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = SITE_CONFIG.baseUrl.replace(/\/+$/, "");

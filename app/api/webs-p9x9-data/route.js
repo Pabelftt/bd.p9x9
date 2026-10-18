@@ -1,9 +1,28 @@
+import crypto from "crypto";
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Movie from "@/lib/models/Movie";
 
+function isValidWebhookSecret(provided, expected) {
+  if (typeof provided !== "string" || !provided) return false;
+  const bufProvided = Buffer.from(provided);
+  const bufExpected = Buffer.from(expected);
+  if (bufProvided.length !== bufExpected.length) return false;
+  return crypto.timingSafeEqual(bufProvided, bufExpected);
+}
+
 export async function POST(request) {
   try {
+    // Optional protection: enforced only when SCRAPER_WEBHOOK_SECRET is set,
+    // so existing scrapers keep working until the secret is configured.
+    const webhookSecret = (process.env.SCRAPER_WEBHOOK_SECRET || "").trim();
+    if (webhookSecret) {
+      const provided = request.headers.get("x-webhook-secret") || "";
+      if (!isValidWebhookSecret(provided, webhookSecret)) {
+        return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+      }
+    }
+
     await connectDB();
     const body = await request.json().catch(() => ({}));
 
